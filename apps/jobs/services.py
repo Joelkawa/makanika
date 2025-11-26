@@ -337,6 +337,41 @@ class JobService:
             "completed_at": job.completed_at
         }
 
+
+    def get_jobs_public(
+        self,
+        customer_phone: str,
+        skip: int = 0,
+        limit: int = 100
+    ) -> Tuple[List[Dict], int]:
+        """Get jobs by phone number - PUBLIC (no auth required)
+        Used for customer tracking without login
+        """
+        query = self.db.query(Job)
+        
+        # Clean phone number - remove spaces, dashes, etc.
+        clean_phone = ''.join(filter(str.isdigit, customer_phone))
+        
+        # Search by phone number (flexible matching)
+        query = query.filter(
+            or_(
+                Job.customer_phone.ilike(f"%{customer_phone}%"),
+                Job.customer_phone.ilike(f"%{clean_phone}%")
+            )
+        )
+        
+        # Order by creation date (newest first)
+        query = query.order_by(Job.created_at.desc())
+        
+        # Get total count
+        total = query.count()
+        
+        # Apply pagination
+        raw_jobs = query.offset(skip).limit(limit).all()
+        jobs = [self.job_to_response(job) for job in raw_jobs]
+        
+        return jobs, total
+
 # Dependency injection
 def get_job_service(db: Session = Depends(get_db)) -> JobService:
     return JobService(db)
