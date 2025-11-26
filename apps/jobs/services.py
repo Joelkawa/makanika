@@ -184,7 +184,7 @@ class JobService:
             customer_credentials=credentials,
             message="Job created successfully" + (" with customer portal access" if credentials else "")
         )
-    
+        
     def update_job(self, job_id: int, job_update: JobUpdate, updated_by: UserModel) -> Job:
         """Update job details"""
         db_job = self.get_job(job_id)
