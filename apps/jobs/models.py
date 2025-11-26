@@ -4,12 +4,14 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
 
-class JobStatus(str,enum.Enum):
+class JobStatus(str, enum.Enum):
+    CHECKED_IN = "CHECKED_IN"
     DIAGNOSING = "DIAGNOSING"
     REPAIRING = "REPAIRING"
     WAITING_FOR_PARTS = "WAITING_FOR_PARTS"
     READY = "READY"
     COMPLETED = "COMPLETED"
+
 class Job(Base):
     __tablename__ = "jobs"
 
@@ -34,8 +36,11 @@ class Job(Base):
     estimated_cost = Column(Float, default=0.0)
     actual_cost = Column(Float, default=0.0)
     
+    # Estimated pickup/completion
+    estimated_completion = Column(String(100), nullable=True)
+    
     # Status and tracking
-    status = Column(SQLEnum(JobStatus), default=JobStatus.DIAGNOSING)
+    status = Column(SQLEnum(JobStatus), default=JobStatus.CHECKED_IN)
     priority = Column(Integer, default=1)  # 1=Low, 2=Medium, 3=High, 4=Urgent
     
     # Timestamps
